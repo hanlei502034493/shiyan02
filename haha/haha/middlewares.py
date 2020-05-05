@@ -4,8 +4,26 @@
 #
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
-
+from fake_useragent import UserAgent
 from scrapy import signals
+import requests
+import random
+url_proxy="http://api.xdaili.cn/xdaili-api//greatRecharge/getGreatIp?spiderId=699cdcf0463a4f5d91006d54f3261f07&orderno=YZ2020399572b5YqKu&returnType=2&count=10"
+ip_pool=[]
+headers={
+    "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36"
+}
+
+res1=requests.get(url=url_proxy,headers=headers).json()
+
+for res in res1["RESULT"]:
+    ip="http://"+res["ip"]+":"+res["port"]
+    ip_pool.append(ip)
+
+ua = UserAgent()
+ua_pool = []
+for i in range(10):
+    ua_pool.append(ua.chrome)
 
 
 class HahaSpiderMiddleware(object):
@@ -69,6 +87,8 @@ class HahaDownloaderMiddleware(object):
         return s
 
     def process_request(self, request, spider):
+        request.meta["proxy"] = random.choice(ip_pool)
+        request.headers['User-Agent'] = random.choice(ua_pool)
         # Called for each request that goes through the downloader
         # middleware.
 
